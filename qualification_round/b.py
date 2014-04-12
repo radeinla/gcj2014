@@ -2,8 +2,6 @@
 
 import sys
 
-memo = {}
-
 def get_file(argv):
     if len(argv) == 1:
         return "b.in"
@@ -22,48 +20,19 @@ def print_answer(t, answer, f):
     f.write(answer)
     f.write("\n")
 
-def get_min(c, r, t, C, F, X, curr_min, depth=0):
-    """c = current cookies
-    r = current rate
-    t = time spent
-    C = cookies per farm
-    F = additional rate per farm
-    X = target
-    """
-    try:
-        memo[(c, r, t)]
-        return memo[(c, r, t)]
-    except:
-        print "\t"*depth, (c, r, t)
-        if c == X:
-            ans = t
-        elif t > curr_min:
-            ans = curr_min
-        else:
-            to_target = (X-c)/r
-            a = get_min(X, r, t+to_target, C, F, X, min(curr_min, t+to_target), depth+1)
-            next_farm_cost = (C-c)/r
-            b = get_min(0, r+F, t+next_farm_cost, C, F, X, min(t+to_target, curr_min), depth+1)
-            ans = min(a, b)
-        memo[(c, r, t)] = ans
-        return ans
-
 def loop_optimized(C, F, X):
-    todo = [(0, 2, 0)]
-    curr_min = X/2
-    while len(todo) > 0:
-        c,r,t = todo.pop(0)
-        if c == X:
-            curr_min = min(curr_min, t)
-        elif t > curr_min:
-            continue
+    c, r, t = float(0), float(2), float(0)
+    while c < X:
+        no_farm_cost = (X-c)/r
+        next_farm_cost = (C-c)/r
+        if no_farm_cost < next_farm_cost + X/(r+F):
+            c = X
+            t += no_farm_cost
         else:
-            to_target = (X-c)/r
-            curr_min = min(curr_min, t+to_target)
-            todo.insert(0, (X, r, t+to_target))
-            next_farm_cost = (C-c)/r
-            todo.insert(0, (0, r+F, t+next_farm_cost))
-    return curr_min
+            c = 0
+            r += F
+            t += next_farm_cost
+    return t
 
 def main(argv):
     f = open(get_file(argv), 'r')
@@ -74,10 +43,7 @@ def main(argv):
         C = float(arr[0])
         F = float(arr[1])
         X = float(arr[2])
-        memo.clear()
-        # print_answer(t, "%.7f" % loop_optimized(C, F, X), f_out)
-        print_answer(t, "%.7f" % get_min(0, 2, 0, C, F, X, X/2), f_out)
+        print_answer(t, "%.7f" % loop_optimized(C, F, X), f_out)
 
 if __name__ == "__main__":
-    # sys.setrecursionlimit(10000)
     main(sys.argv)
