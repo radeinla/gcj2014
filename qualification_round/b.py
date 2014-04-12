@@ -30,15 +30,8 @@ def get_min(c, r, t, C, F, X, curr_min):
     F = additional rate per farm
     X = target
     """
-    # get
-    # if (C-c)/r < X-c/r:
-    #     return get_min()
-    # next_farm_cost = 
-    # print (c, r, t, C, F, X, curr_min)
-    # print (c, r, t)
     try:
         memo[(c, r, t)]
-        # print 'using memoized!'
         return memo[(c, r, t)]
     except:
         if c == X:
@@ -47,14 +40,29 @@ def get_min(c, r, t, C, F, X, curr_min):
             ans = curr_min
         else:
             to_target = (X-c)/r
-            # print to_target
-            a = get_min(X, r, t+to_target, C, F, X, t+to_target)
+            a = get_min(X, r, t+to_target, C, F, X, min(curr_min, t+to_target))
             next_farm_cost = (C-c)/r
-            # print next_farm_cost
             b = get_min(0, r+F, t+next_farm_cost, C, F, X, min(t+to_target, curr_min))
             ans = min(a, b)
         memo[(c, r, t)] = ans
         return ans
+
+def loop_optimized(C, F, X):
+    todo = [(0, 2, 0)]
+    curr_min = X/2
+    while len(todo) > 0:
+        c,r,t = todo.pop(0)
+        if c == X:
+            curr_min = min(curr_min, t)
+        elif t > curr_min:
+            continue
+        else:
+            to_target = (X-c)/r
+            curr_min = min(curr_min, t+to_target)
+            todo.insert(0, (X, r, t+to_target))
+            next_farm_cost = (C-c)/r
+            todo.insert(0, (0, r+F, t+next_farm_cost))
+    return curr_min
 
 def main(argv):
     f = open(get_file(argv), 'r')
@@ -66,8 +74,9 @@ def main(argv):
         F = float(arr[1])
         X = float(arr[2])
         memo.clear()
-        print_answer(t, "%.7f" % get_min(0, 2, 0, C, F, X, X/2), f_out)
+        print_answer(t, "%.7f" % loop_optimized(C, F, X), f_out)
+        # print_answer(t, "%.7f" % get_min(0, 2, 0, C, F, X, X/2), f_out)
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(10000)
+    # sys.setrecursionlimit(10000)
     main(sys.argv)
