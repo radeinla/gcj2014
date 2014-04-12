@@ -40,7 +40,7 @@ def main(argv):
         if len(same) == 0:
             print_answer(t, "Volunteer cheated!", f_out)
         elif len(same) == 1:
-            print_answer(t, same.pop(), f_out)
+            print_answer(t, "%d" % same.pop(), f_out)
         else:
             print_answer(t, "Bad magician!", f_out)
 
